@@ -1,577 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FCM Notification Sender</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FCM Tester - Go Backend</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-        }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+      }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
 
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
 
-        .section {
-            margin-bottom: 25px;
-        }
+      .section {
+        margin-bottom: 25px;
+      }
 
-        label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
+      label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
 
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
 
-        input[type="text"]:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+      input[type="text"]:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
 
-        textarea {
-            resize: vertical;
-            font-family: 'Courier New', monospace;
-        }
+      textarea {
+        resize: vertical;
+        font-family: "Courier New", monospace;
+      }
 
-        .token-list {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+      .token-list {
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
 
-        .token-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: white;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 12px;
-            font-family: 'Courier New', monospace;
-        }
+      .token-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        font-size: 12px;
+        font-family: "Courier New", monospace;
+      }
 
-        .token-item:last-child {
-            margin-bottom: 0;
-        }
+      .token-text {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: 10px;
+      }
 
-        .token-text {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            margin-right: 10px;
-        }
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
 
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
+      .btn-success:hover {
+        background: #059669;
+      }
 
-        .btn-success:hover {
-            background: #059669;
-        }
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+        padding: 6px 12px;
+        font-size: 12px;
+      }
 
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-            padding: 6px 12px;
-            font-size: 12px;
-        }
+      .btn-secondary {
+        background: #6b7280;
+        color: white;
+      }
 
-        .btn-danger:hover {
-            background: #dc2626;
-        }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
+      .button-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
 
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
+      .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+      }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+      .alert.show {
+        display: block;
+        animation: slideIn 0.3s ease;
+      }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
         }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
+      .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 2px solid #10b981;
+      }
 
-        .alert.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
+      .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 2px solid #ef4444;
+      }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+      .alert-warning {
+        background: #fef3c7;
+        color: #92400e;
+        border: 2px solid #f59e0b;
+      }
 
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 2px solid #10b981;
-        }
+      .response-box {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+        margin-top: 10px;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
 
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 2px solid #ef4444;
-        }
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
 
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 2px solid #f59e0b;
-        }
+      .loading.show {
+        display: block;
+      }
 
-        .response-box {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 10px;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+      }
 
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-        .loading.show {
-            display: block;
-        }
+      .info-box {
+        background: #eff6ff;
+        border: 2px solid #3b82f6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #1e40af;
+      }
 
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background: #10b981;
+        color: white;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+      }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+      .server-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        background: #f3f4f6;
+        border-radius: 6px;
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
 
-        .info-box {
-            background: #eff6ff;
-            border: 2px solid #3b82f6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #1e40af;
-        }
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ef4444;
+      }
 
-        .info-box strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            background: #667eea;
-            color: white;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
+      .status-dot.online {
+        background: #10b981;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🔔 FCM Notification Sender</h1>
-        <p class="subtitle">Kirim notifikasi ke multiple FCM tokens dengan mudah</p>
+      <h1>🔔 FCM Notification Tester <span class="badge">Go Backend</span></h1>
+      <p class="subtitle">Test your FCM notifications via Go backend server</p>
 
-        <div id="alertBox" class="alert"></div>
+      <div class="server-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="serverStatus">Checking server...</span>
+        <button
+          class="btn btn-secondary"
+          onclick="checkServer()"
+          style="margin-left: auto; padding: 6px 12px; font-size: 12px"
+        >
+          🔄 Refresh
+        </button>
+      </div>
 
-        <div class="info-box">
-            <strong>📌 Cara Pakai:</strong>
-            1. Masukkan Server Key dari Firebase Console<br>
-            2. Tambahkan FCM Token dari aplikasi Flutter Anda<br>
-            3. Isi notifikasi dan klik Send!
+      <div id="alertBox" class="alert"></div>
+
+      <div class="info-box">
+        <strong>⚡ Quick Start:</strong><br />
+        1. Make sure Go backend is running on <code>http://localhost:3000</code
+        ><br />
+        2. Add your FCM tokens below<br />
+        3. Send notifications!
+      </div>
+
+      <div class="section">
+        <label>Backend URL</label>
+        <input
+          type="text"
+          id="backendUrl"
+          value="http://localhost:3000"
+          placeholder="http://localhost:3000"
+        />
+      </div>
+
+      <div class="section">
+        <label>Add FCM Token</label>
+        <div style="display: flex; gap: 10px">
+          <input
+            type="text"
+            id="tokenInput"
+            placeholder="Paste FCM token here"
+            style="flex: 1"
+          />
+          <button class="btn btn-success" onclick="addToken()">➕ Add</button>
         </div>
 
-        <div class="section">
-            <label>Server Key <span class="badge">Required</span></label>
-            <input type="text" id="serverKey" placeholder="Paste your Firebase Server Key here (Legacy)">
-            <small style="color: #666; display: block; margin-top: 5px;">
-                Get from: Firebase Console → Project Settings → Cloud Messaging → Server key
-            </small>
+        <div class="token-list" id="tokenList">
+          <p style="color: #999; text-align: center; padding: 20px">
+            No tokens added yet
+          </p>
         </div>
+      </div>
 
-        <div class="section">
-            <label>Add FCM Token</label>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="tokenInput" placeholder="Paste FCM token here" style="flex: 1;">
-                <button class="btn btn-success" onclick="addToken()">➕ Add</button>
-            </div>
-            
-            <div class="token-list" id="tokenList">
-                <p style="color: #999; text-align: center; padding: 20px;">No tokens added yet</p>
-            </div>
-        </div>
+      <div class="section">
+        <label>Notification Title</label>
+        <input
+          type="text"
+          id="notifTitle"
+          placeholder="e.g., New Message"
+          value="Test Notification"
+        />
+      </div>
 
-        <div class="section">
-            <label>Notification Title</label>
-            <input type="text" id="notifTitle" placeholder="e.g., New Message" value="Test Notification">
-        </div>
+      <div class="section">
+        <label>Notification Body</label>
+        <textarea
+          id="notifBody"
+          rows="3"
+          placeholder="Enter your message here..."
+        >
+Hello! This is a test notification from Go FCM Server</textarea
+        >
+      </div>
 
-        <div class="section">
-            <label>Notification Body</label>
-            <textarea id="notifBody" rows="3" placeholder="Enter your message here...">Hello! This is a test notification from FCM Sender</textarea>
-        </div>
-
-        <div class="section">
-            <label>Custom Data (Optional - JSON Format)</label>
-            <textarea id="customData" rows="4" placeholder='{"key": "value", "action": "open_page"}'>{
+      <div class="section">
+        <label>Custom Data (Optional - JSON Format)</label>
+        <textarea id="customData" rows="4" placeholder='{"key": "value"}'>
+{
   "page": "home",
-  "timestamp": "2024-01-01"
-}</textarea>
-        </div>
+  "action": "click"
+}</textarea
+        >
+      </div>
 
-        <div class="button-group">
-            <button class="btn btn-primary" onclick="sendNotifications()">
-                🚀 Send to All Tokens
-            </button>
-            <button class="btn btn-secondary" onclick="testNotification()">
-                🧪 Test Send (First Token)
-            </button>
-            <button class="btn btn-secondary" onclick="clearAll()">
-                🗑️ Clear All
-            </button>
-        </div>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="sendNotifications()">
+          🚀 Send to All Tokens
+        </button>
+        <button class="btn btn-secondary" onclick="testNotification()">
+          🧪 Test (First Token)
+        </button>
+        <button class="btn btn-secondary" onclick="sendToTopic()">
+          📢 Send to Topic
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">
+          🗑️ Clear All
+        </button>
+      </div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Sending notifications...</p>
-        </div>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Sending notifications...</p>
+      </div>
 
-        <div id="responseBox" class="response-box" style="display: none;"></div>
+      <div id="responseBox" class="response-box" style="display: none"></div>
     </div>
 
     <script>
-        let tokens = [];
+      let tokens = [];
 
-        function addToken() {
-            const input = document.getElementById('tokenInput');
-            const token = input.value.trim();
-            
-            if (!token) {
-                showAlert('Please enter a token!', 'error');
-                return;
-            }
+      // Check server status on load
+      window.onload = function () {
+        checkServer();
+      };
 
-            if (tokens.includes(token)) {
-                showAlert('Token already added!', 'warning');
-                return;
-            }
+      async function checkServer() {
+        const backendUrl = document.getElementById("backendUrl").value;
+        const statusDot = document.getElementById("statusDot");
+        const statusText = document.getElementById("serverStatus");
 
-            tokens.push(token);
-            input.value = '';
-            renderTokens();
-            showAlert('Token added successfully!', 'success');
+        try {
+          const response = await fetch(backendUrl);
+          if (response.ok) {
+            const data = await response.json();
+            statusDot.classList.add("online");
+            statusText.textContent = "Server Online: " + data.status;
+          } else {
+            statusDot.classList.remove("online");
+            statusText.textContent = "Server Error: " + response.status;
+          }
+        } catch (error) {
+          statusDot.classList.remove("online");
+          statusText.textContent =
+            "Server Offline - Please start the Go backend";
+        }
+      }
+
+      function addToken() {
+        const input = document.getElementById("tokenInput");
+        const token = input.value.trim();
+
+        if (!token) {
+          showAlert("Please enter a token!", "error");
+          return;
         }
 
-        function removeToken(index) {
-            tokens.splice(index, 1);
-            renderTokens();
-            showAlert('Token removed!', 'success');
+        if (tokens.includes(token)) {
+          showAlert("Token already added!", "warning");
+          return;
         }
 
-        function renderTokens() {
-            const tokenList = document.getElementById('tokenList');
-            
-            if (tokens.length === 0) {
-                tokenList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No tokens added yet</p>';
-                return;
-            }
+        tokens.push(token);
+        input.value = "";
+        renderTokens();
+        showAlert("Token added successfully!", "success");
+      }
 
-            tokenList.innerHTML = tokens.map((token, index) => `
+      function removeToken(index) {
+        tokens.splice(index, 1);
+        renderTokens();
+        showAlert("Token removed!", "success");
+      }
+
+      function renderTokens() {
+        const tokenList = document.getElementById("tokenList");
+
+        if (tokens.length === 0) {
+          tokenList.innerHTML =
+            '<p style="color: #999; text-align: center; padding: 20px;">No tokens added yet</p>';
+          return;
+        }
+
+        tokenList.innerHTML = tokens
+          .map(
+            (token, index) => `
                 <div class="token-item">
                     <span class="token-text" title="${token}">${token}</span>
                     <button class="btn btn-danger" onclick="removeToken(${index})">✕</button>
                 </div>
-            `).join('');
+            `
+          )
+          .join("");
+      }
+
+      function showAlert(message, type) {
+        const alertBox = document.getElementById("alertBox");
+        alertBox.className = `alert alert-${type} show`;
+        alertBox.textContent = message;
+
+        setTimeout(() => {
+          alertBox.classList.remove("show");
+        }, 4000);
+      }
+
+      function showLoading(show) {
+        document.getElementById("loading").classList.toggle("show", show);
+      }
+
+      function showResponse(data) {
+        const responseBox = document.getElementById("responseBox");
+        responseBox.style.display = "block";
+        responseBox.textContent = JSON.stringify(data, null, 2);
+      }
+
+      async function testNotification() {
+        if (tokens.length === 0) {
+          showAlert("Please add at least one token first!", "error");
+          return;
         }
 
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.className = `alert alert-${type} show`;
-            alertBox.textContent = message;
-            
-            setTimeout(() => {
-                alertBox.classList.remove('show');
-            }, 3000);
+        const backendUrl = document.getElementById("backendUrl").value;
+        const title = document.getElementById("notifTitle").value.trim();
+        const body = document.getElementById("notifBody").value.trim();
+        const customDataStr = document
+          .getElementById("customData")
+          .value.trim();
+
+        if (!title || !body) {
+          showAlert("Please fill title and body!", "error");
+          return;
         }
 
-        function showLoading(show) {
-            document.getElementById('loading').classList.toggle('show', show);
+        let data = {};
+        if (customDataStr) {
+          try {
+            data = JSON.parse(customDataStr);
+          } catch (e) {
+            showAlert("Invalid JSON format!", "error");
+            return;
+          }
         }
 
-        function showResponse(data) {
-            const responseBox = document.getElementById('responseBox');
-            responseBox.style.display = 'block';
-            responseBox.textContent = JSON.stringify(data, null, 2);
+        showLoading(true);
+
+        try {
+          const response = await fetch(`${backendUrl}/send-notification`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              token: tokens[0],
+              title: title,
+              body: body,
+              data: data,
+            }),
+          });
+
+          const result = await response.json();
+          showLoading(false);
+
+          if (result.success) {
+            showAlert("✅ Test notification sent successfully!", "success");
+          } else {
+            showAlert("❌ Failed: " + result.error, "error");
+          }
+
+          showResponse(result);
+        } catch (error) {
+          showLoading(false);
+          showAlert("❌ Error: " + error.message, "error");
+          showResponse({ error: error.message });
+        }
+      }
+
+      async function sendNotifications() {
+        if (tokens.length === 0) {
+          showAlert("Please add at least one token!", "error");
+          return;
         }
 
-        async function sendToToken(token, serverKey, title, body, data) {
-            const url = 'https://fcm.googleapis.com/fcm/send';
-            
-            const payload = {
-                to: token,
-                notification: {
-                    title: title,
-                    body: body,
-                    sound: 'default',
-                    priority: 'high'
-                },
-                data: data,
-                priority: 'high'
-            };
+        const backendUrl = document.getElementById("backendUrl").value;
+        const title = document.getElementById("notifTitle").value.trim();
+        const body = document.getElementById("notifBody").value.trim();
+        const customDataStr = document
+          .getElementById("customData")
+          .value.trim();
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `key=${serverKey}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            return await response.json();
+        if (!title || !body) {
+          showAlert("Please fill title and body!", "error");
+          return;
         }
 
-        async function sendNotifications() {
-            const serverKey = document.getElementById('serverKey').value.trim();
-            const title = document.getElementById('notifTitle').value.trim();
-            const body = document.getElementById('notifBody').value.trim();
-            const customDataStr = document.getElementById('customData').value.trim();
+        let data = {};
+        if (customDataStr) {
+          try {
+            data = JSON.parse(customDataStr);
+          } catch (e) {
+            showAlert("Invalid JSON format!", "error");
+            return;
+          }
+        }
 
-            if (!serverKey) {
-                showAlert('Please enter Server Key!', 'error');
-                return;
-            }
+        showLoading(true);
 
-            if (tokens.length === 0) {
-                showAlert('Please add at least one token!', 'error');
-                return;
-            }
+        try {
+          const response = await fetch(`${backendUrl}/send-multiple`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              tokens: tokens,
+              title: title,
+              body: body,
+              data: data,
+            }),
+          });
 
-            if (!title || !body) {
-                showAlert('Please fill title and body!', 'error');
-                return;
-            }
+          const result = await response.json();
+          showLoading(false);
 
-            let customData = {};
-            if (customDataStr) {
-                try {
-                    customData = JSON.parse(customDataStr);
-                } catch (e) {
-                    showAlert('Invalid JSON format in Custom Data!', 'error');
-                    return;
-                }
-            }
-
-            showLoading(true);
-            const results = [];
-
-            for (let i = 0; i < tokens.length; i++) {
-                try {
-                    const result = await sendToToken(tokens[i], serverKey, title, body, customData);
-                    results.push({
-                        token: tokens[i].substring(0, 20) + '...',
-                        success: result.success === 1,
-                        response: result
-                    });
-                } catch (error) {
-                    results.push({
-                        token: tokens[i].substring(0, 20) + '...',
-                        success: false,
-                        error: error.message
-                    });
-                }
-            }
-
-            showLoading(false);
-
-            const successCount = results.filter(r => r.success).length;
-            const failCount = results.length - successCount;
-
+          if (result.success) {
             showAlert(
-                `✅ Sent to ${successCount}/${tokens.length} tokens | ❌ Failed: ${failCount}`,
-                successCount > 0 ? 'success' : 'error'
+              `✅ Sent ${result.successCount}/${tokens.length} | ❌ Failed: ${result.failureCount}`,
+              "success"
             );
+          } else {
+            showAlert("❌ Failed: " + result.error, "error");
+          }
 
-            showResponse({
-                totalTokens: tokens.length,
-                successful: successCount,
-                failed: failCount,
-                results: results
-            });
+          showResponse(result);
+        } catch (error) {
+          showLoading(false);
+          showAlert("❌ Error: " + error.message, "error");
+          showResponse({ error: error.message });
+        }
+      }
+
+      async function sendToTopic() {
+        const topic = prompt("Enter topic name (e.g., all_users):");
+        if (!topic) return;
+
+        const backendUrl = document.getElementById("backendUrl").value;
+        const title = document.getElementById("notifTitle").value.trim();
+        const body = document.getElementById("notifBody").value.trim();
+        const customDataStr = document
+          .getElementById("customData")
+          .value.trim();
+
+        if (!title || !body) {
+          showAlert("Please fill title and body!", "error");
+          return;
         }
 
-        async function testNotification() {
-            if (tokens.length === 0) {
-                showAlert('Please add at least one token first!', 'error');
-                return;
-            }
-
-            const serverKey = document.getElementById('serverKey').value.trim();
-            const title = document.getElementById('notifTitle').value.trim();
-            const body = document.getElementById('notifBody').value.trim();
-            const customDataStr = document.getElementById('customData').value.trim();
-
-            if (!serverKey) {
-                showAlert('Please enter Server Key!', 'error');
-                return;
-            }
-
-            let customData = {};
-            if (customDataStr) {
-                try {
-                    customData = JSON.parse(customDataStr);
-                } catch (e) {
-                    showAlert('Invalid JSON format!', 'error');
-                    return;
-                }
-            }
-
-            showLoading(true);
-
-            try {
-                const result = await sendToToken(tokens[0], serverKey, title, body, customData);
-                showLoading(false);
-                
-                if (result.success === 1) {
-                    showAlert('✅ Test notification sent successfully!', 'success');
-                } else {
-                    showAlert('❌ Failed to send: ' + (result.results?.[0]?.error || 'Unknown error'), 'error');
-                }
-                
-                showResponse(result);
-            } catch (error) {
-                showLoading(false);
-                showAlert('❌ Error: ' + error.message, 'error');
-                showResponse({ error: error.message });
-            }
+        let data = {};
+        if (customDataStr) {
+          try {
+            data = JSON.parse(customDataStr);
+          } catch (e) {
+            showAlert("Invalid JSON format!", "error");
+            return;
+          }
         }
 
-        function clearAll() {
-            if (confirm('Clear all tokens and data?')) {
-                tokens = [];
-                renderTokens();
-                document.getElementById('responseBox').style.display = 'none';
-                showAlert('All data cleared!', 'success');
-            }
-        }
+        showLoading(true);
 
-        // Handle Enter key on token input
-        document.getElementById('tokenInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                addToken();
-            }
+        try {
+          const response = await fetch(`${backendUrl}/send-topic`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              topic: topic,
+              title: title,
+              body: body,
+              data: data,
+            }),
+          });
+
+          const result = await response.json();
+          showLoading(false);
+
+          if (result.success) {
+            showAlert(`✅ Sent to topic: ${topic}`, "success");
+          } else {
+            showAlert("❌ Failed: " + result.error, "error");
+          }
+
+          showResponse(result);
+        } catch (error) {
+          showLoading(false);
+          showAlert("❌ Error: " + error.message, "error");
+          showResponse({ error: error.message });
+        }
+      }
+
+      function clearAll() {
+        if (confirm("Clear all tokens and data?")) {
+          tokens = [];
+          renderTokens();
+          document.getElementById("responseBox").style.display = "none";
+          showAlert("All data cleared!", "success");
+        }
+      }
+
+      document
+        .getElementById("tokenInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            addToken();
+          }
         });
     </script>
-</body>
+  </body>
 </html>
